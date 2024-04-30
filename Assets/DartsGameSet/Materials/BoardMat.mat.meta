@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 286797e1aabecce4ca5ba6b54dcbf7f5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 116541
+  packageName: Darts Game Set
+  packageVersion: 1.0
+  assetPath: Assets/DartsGameSet/Materials/BoardMat.mat
+  uploadId: 420454

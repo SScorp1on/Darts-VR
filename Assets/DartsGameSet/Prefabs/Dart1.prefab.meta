@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 50002a7403d43fe46a24b1f3a9538f6a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 116541
+  packageName: Darts Game Set
+  packageVersion: 1.0
+  assetPath: Assets/DartsGameSet/Prefabs/Dart1.prefab
+  uploadId: 420454
