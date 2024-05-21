@@ -5,11 +5,11 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.SceneManagement;
 public class DartScript: MonoBehaviour
 {
 
     public AudioSource DartHit;
-    public GameObject CustomRightHand;
     public Vector3 lastPosition;
     public bool grabbed = false;
     public bool first = true;
@@ -19,110 +19,49 @@ public class DartScript: MonoBehaviour
     public int total_throws = 0;
     Rigidbody m_Rigidbody;
 
-    public XRController rightHandController;
-    public XRBaseInteractable interactable;
     // Start is called before the first frame update
     void Start()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
-        interactable.activated.AddListener(HandleButtonPress);
         lastPosition = new Vector3(0, 0, 0);
+        XRGrabInteractable grabbable = GetComponent<XRGrabInteractable>();
+        grabbable.selectExited.AddListener(HandleButtonPress);
+        Debug.Log(grabbable);
     }
-    void HandleButtonPress(ActivateEventArgs args)
+
+
+    public void HandleButtonPress(SelectExitEventArgs arg)
     {
-        // Выводим текст в консоль при нажатии на кнопку
-        Debug.Log("Кнопка была нажата");
-        Debug.Log(args);
+        ReleaseDart();
     }
-    // Update is called once per frame
-    void Update()
+
+    public void ReleaseDart()
     {
-        if (rightHandController.inputDevice.TryGetFeatureValue(CommonUsages.primaryButton, out bool primaryButtonValue) && primaryButtonValue)
-        {
-            Debug.Log("HI");
-            d_radius = 0;
-            points = 0;
-            total_points = 0;
-            total_throws = 0;
-            String score_text = "Score: " + total_points.ToString();
-            String dist_text = " Distance: " + 0;
-            String point_text = " Points: " + 0;
-            String throw_text = " Throws: " + 0;
+        m_Rigidbody.isKinematic = false;
 
-
-
-            TextMeshPro Scoreboard = (GameObject.FindWithTag("Scoreboard")).GetComponent<TextMeshPro>();
-            Scoreboard.text = score_text + dist_text + point_text + throw_text;
-        }
-
-        if (rightHandController.inputDevice.TryGetFeatureValue(CommonUsages.grip, out float gripValue) && gripValue >= 0.5f)
-        {
-            m_Rigidbody.isKinematic = false;
-            Vector3 displacement = CustomRightHand.transform.position - lastPosition;
-
-            // set position of dart
-            this.transform.position = CustomRightHand.transform.position;
-            this.GetComponent<Rigidbody>().velocity = (displacement / Time.deltaTime) * 1.4f;
-
-            lastPosition = CustomRightHand.transform.position;
-            Debug.Log(this.transform.eulerAngles);
-
-            if (first)
-            {
-                total_throws += 1;
-                first = false;
-            }
-            String score_text = "Score: " + total_points.ToString();
-            String dist_text = " Distance: " + d_radius;
-            String point_text = " Points: " + points;
-            String throw_text = " Throws: " + total_throws.ToString();
-
-            Debug.Log(score_text);
-            TextMeshPro Scoreboard = (GameObject.FindWithTag("Scoreboard")).GetComponent<TextMeshPro>();
-            Scoreboard.text = score_text + dist_text + point_text + throw_text;
-        }
-        else
-        {
-            grabbed = false;
-            first = true;
-        }
+        transform.SetParent(null);
     }
-
-    void LateUpdate()
-    {
-
-        this.transform.rotation = Quaternion.Euler(new Vector3(0, 270, 0));
-    }
-
     // Update is called once per frame
     void OnCollisionEnter(Collision other)
     {
-
         // hits table
-        if (other.gameObject.tag == "DartBoard")
+        if (other.gameObject.tag == "Dartboard")
         {
             // play dart hit
             DartHit.Play();
 
-            // Have object stop
-            //m_Rigidbody.velocity = Vector3.zero;
-            //m_Rigidbody.angularVelocity = Vector3.zero;
-
-            // turn off gravity
-            //m_Rigidbody.useGravity = false;
             m_Rigidbody.isKinematic = true;
 
-
+            total_throws += 1;
             // Get Measurements
             Vector2 origin = new Vector2(other.transform.position.x, other.transform.position.y);
             Vector2 dartHit = new Vector2(this.transform.position.x, this.transform.position.y);
             float x = this.transform.position.x - other.transform.position.x;
             float y = this.transform.position.y - other.transform.position.y;
-
             float m_angle = Vector2.SignedAngle(origin, dartHit);
 
             // get angle from origin
-            float angle = (float)((Mathf.Atan2(x, y) / Math.PI) * 180f);
+            float angle = Mathf.Atan2(dartHit.y - origin.y, dartHit.x - origin.x) * Mathf.Rad2Deg;
             if (angle < 0) angle += 360f;
 
             float distance = Vector2.Distance(origin, dartHit);
@@ -528,13 +467,10 @@ public class DartScript: MonoBehaviour
             }
             total_points += points;
             String score_text = "Score: " + total_points.ToString();
-            String dist_text = " Distance: " + d_radius;
             String point_text = " Points: " + points;
             String throw_text = " Throws: " + total_throws.ToString();
-
-            Debug.Log(score_text);
             TextMeshPro Scoreboard = (GameObject.FindWithTag("Scoreboard")).GetComponent<TextMeshPro>();
-            Scoreboard.text = score_text + dist_text + point_text + throw_text;
+            Scoreboard.text = score_text + point_text + throw_text;
 
         }
     }
